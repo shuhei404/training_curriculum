@@ -15,7 +15,7 @@ class CalendarsController < ApplicationController
   private
 
   def plan_params
-    params.require(:calendars).permit(:date, :plan)
+    params.require(:plan).permit(:date, :plan)
   end
 
   def get_week
@@ -34,7 +34,29 @@ class CalendarsController < ApplicationController
       plans.each do |plan|
         today_plans.push(plan.plan) if plan.date == @todays_date + x
       end
-      days = {month:(@todays_date + x).month, date:(@todays_date+x).day, plans:today_plans}
+
+      wday_num = @todays_date.wday + x     # wdayメソッドを用いて取得した数値
+      # wdays[wday_num] => '(水)'
+
+      # 1回目の繰り返し x=0
+      #   wday_num = 3 = 3 + 0
+      # 2回目の繰り返し x=1
+      #   wday_num = 4 = 3 + 1
+      # 3回目の繰り返し x=2
+      #   wday_num = 5 = 3 + 2
+      # 4回目の繰り返し x=3
+      #   wday_num = 6 = 3 + 3
+      # 5回目の繰り返し x=4
+      #   wday_num = 7 = 3 + 4
+      # 6回目の繰り返し x=5
+      #   wday_num = 1 = 3 + 5 -7
+      # 7回目の繰り返し x=6
+      #   wday_num = 2 = 3 + 6 -7
+
+      if wday_num > 7 #「wday_numが7以上の場合」という条件式
+        wday_num = wday_num - 7 
+      end
+      days = {month:(@todays_date + x).month, date:(@todays_date+x).day, plans:today_plans, wday:wdays[wday_num]}
       @week_days.push(days)
     end
 
